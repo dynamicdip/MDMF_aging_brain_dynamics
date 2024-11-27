@@ -1,0 +1,222 @@
+%-====================================================================================================================================================
+"Neuromolecular interactions guiding homeostatic mechanisms underlying healthy ageing: A view from computational microscope"
+Suman Saha, Priyanka Chakraborty , Amit Naskar , Dipanjan Roy2, and Arpan Banerjee
+Cognitive Brain Dynamics Lab, National Brain Research Centre, Manesar-122051, India
+2 School of AIDE, Center for Brain Research and Applications, IIT Jodhpur, Rajasthan 342037, India
+
+%-====================================================================================================================================================
+Step a. Download this folder 
+Step b. Add this folder to the matlab path.
+
+Additional requirement:  Brain COnnectome Toolbox (BCT)
+
+%-====================================================================================================================================================
+%---------------------------Figure 2 in main text Section: 3 Results----------------------------------
+
+%----- To get graph theoretical measures for empirical FCs and SCs----
+
+%----  See folder: "graph_metric_empirical_data"-------
+
+[A_bUo , BC_bUo , CP_bUo , E_bUo , T_bUo , Q_bUo ] = return_property_fc( "rok_fc_old.mat",threshold )
+
+Inputs: path of the subject wise FCs, e.g.: "rok_fc_old.mat"
+       threshold = used to binarize the FCs, e.g., threshold = 0.05;
+Outputs:
+A_bUo  = assortativity  [Size: no. of subjects x 1 ]
+BC_bUo = betweenness   	[Size: no. of subjects x 1 ]
+CP_bUo = charpath      	[Size: no. of subjects x 1 ]
+E_bUo  = efficiency 	[Size: no. of subjects x 1 ]
+T_bUo  = transitivity 	[Size: no. of subjects x 1 ]
+Q_bUo  = modularity 	[Size: no. of subjects x 1 ]
+
+%----------------------
+[A,BC,CP,E,T,Q]= return_property_sc(path)
+
+Inputs: path of the subject wise SCs, e.g.: "rok_sc_old.mat"
+Outputs:
+A  = assortativity      [Size: no. of subjects x 1 ]
+BC = betweenness   	[Size: no. of subjects x 1 ]
+CP = charpath      	[Size: no. of subjects x 1 ]
+E  = efficiency 	[Size: no. of subjects x 1 ]
+T  = transitivity 	[Size: no. of subjects x 1 ]
+Q  = modularity 	[Size: no. of subjects x 1 ]
+
+To plot Fig. 2, run net_prop_fc.m  and  net_prop_sc.m, which call the matlab functions "return_property_fc.m" and "return_property_sc.m". Folder name: "graph_metric_empirical_data".
+Output: return different network-properties. 
+
+For NKI dataset, the output data are given inside the folder, "rok_fc_you.mat" and "rok_sc_you.mat". 
+
+Similarly, the Supplemental material Figs 1 and 2  for three datasets are plotted using "net_prop_fc.m" and  "net_prop_sc.m"
+
+%=====================================================================================================================================================
+
+
+
+
+
+%====================================================================================================================================================
+%--------------------Figure 3 in main text Section:3.1.4 Dynamic working point: Metastability--------------------
+
+%------empirical Metastability measured from BOLD signals of Cam-CAN and Berlin datasets--------
+[R,std_R]=meta_stability(emp_bold_signal)  % band-pass empirical resting-state BOLD signals are preprocessed using CONN
+Input: emipirical BOLD time series,  t x N.
+Output: R=synchronization index and std_R= metastability index. Outputs are two scaler values.
+
+%===================================================================================================================================================
+
+
+
+
+
+%-====================================================================================================================================================
+%----------------Figure 4 is plotted in Section 3.2: Estimated glutamate-GABA concentrations from the MDMF model inversion
+%-------See Folder : 'MDMF_simulation'---------
+
+%-------Main code to run the MDMF model----------"MDMF_fr.m"
+
+[ FCD_se, R_se, std_R_se ] = MDMF_fr ( G, T_Glu, T_Gaba, SC, fcEmp )
+Input:  G      = global coupling strength % e.g., G=0.55
+        T_Glu  = the glutamate level    % e.g., T_Glu = 11.3
+        T_Gaba = the GABA level    % e.g., T_Gaba = 3.35
+        SC     = structural connectivity matrix drawn from DTI of size: (area  x area)
+        FC     = empirical functional connectivity matrix derived from empirical BOLD signals. Size: (area  x area)
+Output: FCD_se = simulated functional connectivity matrix from simulated BOLD signals. Size: (area  x area)
+        R_se   = synchrony index 
+        std_R_se = metastability index.
+        
+Run the main code "MDMF_fr" to generate FCD and metastability maps for individual participants varying T_Glu and T_Gaba
+        
+%----------excitatory and inhibitory firing rate variables used in MDMF model----------"phii.m","phie.m"
+rI=phii(x)
+Input  : inhibitory currents, x in nA
+Output : inhibitory firing rate, rI in Hz
+rE=phie(x)
+Input  : excitatory currents, x in nA
+Output : excitatory firing rate, rI in Hz
+
+%--------Ballon-Windkessel model--------"BOLD.m"
+bold_signal = BOLD(T,S_E)   % based on Gustavo's code implementation of Hemodynamic model
+Input:   T = Total time in second
+         S_E = gating variable. Size: t x N  ; t = time intervals. N = no. of brain areas. 
+Output: bold_signal of size: t x N.
+
+%--------simulated bold signal and simulated FC-------------"simu_fc.m"
+[sim_fc, bold_signal]=simu_fc(T,S_E,ds,nAreas) 
+Input:    T     = Total time in seconds
+          S_E   = gating variable. Size: t x N  ; t = time intervals. N = no. of brain areas. 
+          ds    = down-sampling rate in seconds
+          nAreas= no. of brain areas
+Output:  bold_signal of size: t x N.  sim_FC of size N x N.
+
+%---------empirical and simulated FC distance (FCD)-----------"fc_distance.m"
+[fcDistance] = fc_distance(fc1,fc2)
+Inputs: fc1 and fc2 are empirical and simulated FCs of size N x N.
+Output: fcd= Euclidean distance between the two FCs. A scaler value. 
+
+%---------simulated metastability--------"meta_stability.m"
+[R,std_R]=meta_stability(bold_signal)
+Input: BOLD time series,  t x N.
+Output: R=synchronization index and std_R= metastability index. Outputs are two scaler values.
+
+
+
+Step 1. Generate FCD, metastability maps for individuals:
+	        
+	        Run the matlab file "input1.m" to generate FCD and metastability maps varying T_Glu and T_Gaba for individual subject:
+	        	Run	: "input1.m". This will call the main function "MDMF_fr.m"
+	        	   
+	        Supporting function files are kept inside the folder.
+	        
+	        Input data are the empirical SC and FC of individual subjects.
+	        Input data: 
+	        		"./MDMF_simulation/nki_old/s10_68.mat"
+	        		"./MDMF_simulation/nki_young/s10_20.mat"
+	        		format: strcuture; size: 1x2; label: m;	read ad: sc=struct2array(m(1)) and fc=struct2array(m(2));
+	        
+	        Output data are the FCD and metastability maps. 
+	        Output data files:
+	         		"s1_23_Go2.mat"
+	         		"s2_21_Go2.mat"
+	         		,..., of individuals.
+	         		data header: "{ glutamate, gaba, fcd_se, synch_se, metastability_se, fcd_re, synch_re, metastability_re }"	         		
+	        
+	        
+Step 2. Estimate optimal GABA-glutamate:
+	
+			Run the python scripts to estimate optimal GABA-glut from the FCD and metastability maps for individual participants:
+			Input	: "s1_23_Go2.mat"
+	         		  "s2_21_Go2.mat",...		 
+			Run	: "nki_go2_you.py"
+				  "nki_go2_old.py"
+		
+	        	Output data files containing optimal Glut, GABA of individuals from two groups: 
+	               	Output  : "nki_go2_you.mat" 
+	        		  "nki_go2_old.mat"
+	        
+Step 3. Compare two groups GABA-glutamate levels:%--------------------"nki_go2.m"
+	
+		To plot Figure 4, run matlab script for violin plots:
+			Run	: "nki_go2.m"	 %-------------------Plot violins in Figure 4 
+	 
+%-====================================================================================================================================================
+
+
+
+
+
+%-====================================================================================================================================================
+%----------------Figure 5 is plotted in Section 3.2.1 Model performance evaluated by graph theoretical metrics computed from simulated FC and Supplemental material Fig. S4 for different thresholds is plotted using the following steps------------------------
+ 
+%---------see Folder: "train_test_model"----------------------------
+ 
+Step A. Training:
+
+	The metastability and FCD maps for varying glut and GABA are generated using the Step 1 mentioned above.
+	Input  			: Training cohort's SCs, FCs and T_Glu, T_Gaba. 
+	Run			: "input1.m" . Run this code for each subject from training cohort
+	Output 			: Optimal glut and gaba values, which are estimated using the Step 2 and averaged for each group.
+
+Step B. Testing:
+
+	To generate test-FCs, run the main code for fixed optimal T_Glu and T_Gaba values estimated from individual groups, like step 1 mentioned above.
+        Input  			: Test subjects' SCs, e.g., "s1_sc85.mat"
+	Run    			: "run_testing_model.m"
+	
+
+	Output 			: simulated FCs of test cohort. e.g., "s1_85_Go2.mat" ,...,
+	Output data read as	: load("s1_85_Go2.mat"). sim_fc_se= dat(:,:,1); 
+	
+Step C. Measure simulated-FC network properties:-------------------"return_property_fc_sim.m"
+
+	To plot Fig 5:	
+	Input			: "s1_85_Go2.mat" ,...,
+	
+	Run 			: "test_net_prop.m", which calls the function "return_property_fc_sim.m". 	
+	
+	Output			: network properties and Fig 5.
+	
+%[A,BC,CP,E,T,Q]= return_property_fc_sim(path,thres)
+% Inputs:path of the subject wise simulated FCs. e.g.: "train_test_model/testing/fc_test_old" and "train_test_model/testing/fc_test_you"
+%        threshold = used to binarize the FCs, e.g., threshold = 0.05;
+% Outputs:
+% A=assortativity  	[Size: no of subjects x 1 ]
+% BC=betweenness   	[Size: no of subjects x 1 ]
+% CP= charpath      	[Size: no of subjects x 1 ]
+% E=efficiency 	        [Size: no of subjects x 1 ]
+% T=transitivity 	[Size: no of subjects x 1 ]
+% Q=modularity 	        [Size: no of subjects x 1 ]
+%-====================================================================================================================================================
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
